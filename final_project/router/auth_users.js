@@ -52,6 +52,8 @@ regd_users.post("/login", (req,res) => {
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
 	
+	//Task parcially solved, pending details
+	
 	const storedIsbn=req.params.isbn;
 	
 	let foundBook=books[storedIsbn]; //Retrieve book object associated with ISBN
