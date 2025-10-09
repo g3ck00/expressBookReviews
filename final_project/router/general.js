@@ -4,6 +4,11 @@ let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
 
+//Debug tool
+//public_users.get('/users',function (req, res) {
+//	res.send(JSON.stringify(users, null, 4));
+//});
+
 
 public_users.post("/register", (req,res) => {
 	
@@ -19,11 +24,10 @@ public_users.post("/register", (req,res) => {
 		return false;
 	}
 	}
-
 	  
-	  const username=req.body.username; 
-	  const password=req.body.password;
-	  
+	const username=req.body.username;
+	const password=req.body.password;
+	
 	  //check if both username and password are provided
 	  
 	  if (username && password){
@@ -50,6 +54,28 @@ public_users.get('/',function (req, res) {
   res.send(JSON.stringify(books, null, 4));
 });
 
+//Get the book list avaliable in the shop (using Promise method)
+//Remember: Promises work for asynchronous tasks; most of these actions are synchronous by nature, so it will look like nonsense or redundant
+public_users.get('/p/all',function (req,res){
+	let getAll=new Promise((resolve,reject)=>{
+		
+		let simulatedTask=0; //Just for not leaving empty this block
+	
+		if (books){
+			resolve(books); //This has no sense, but it marks the Promise as solved
+		} else {
+			reject("Unknown error.");
+		}
+	});
+	
+	getAll
+	
+		.then(books=>res.send(JSON.stringify(books, null, 4))) //This will do all the work
+		.catch(err=>res.status(404).send(err));
+	
+});
+
+
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn',function (req, res) {
   
@@ -61,7 +87,26 @@ public_users.get('/isbn/:isbn',function (req, res) {
   
   //I guess the keys are acting as ISBN...?
   
- });
+});
+
+//Get book details based on ISBN (using Promise method)
+//Again has no real utility since it is synchronous, but it is a task to solve
+public_users.get('/p/isbn/:isbn', function(req,res){
+	let getByIsbn=new Promise((resolve,reject)=>{
+		const storedIsbn=req.params.isbn; //Using previous methods
+		const foundBook=books[storedIsbn];
+		
+		if (foundBook){
+			resolve(foundBook);
+		} else {
+			reject("Unable to find that book! (Does it exist...? Check the ISBN.)");
+		}
+	});
+	
+	getByIsbn
+		.then(foundBook=>res.send(JSON.stringify(foundBook, null, 4)))
+		.catch(err=>res.status(404).send(err));
+});
   
 // Get book details based on author
 public_users.get('/author/:author',function (req, res) {
@@ -79,7 +124,28 @@ public_users.get('/author/:author',function (req, res) {
   //Please remember that in "thor.autor" it must always be "temporalVeriable.propertyInArray", not "temporalVariable.placeholderVaraible". I was doin' the last.
   
   res.send(JSON.stringify(filteredAuthor, null, 4));
-  
+});
+
+//Get book details based on author (using Promise)
+public_users.get('/p/author/:author',function(req,res){ //Same situation as previous Promise's
+	let getByAuthor=new Promise((resolve,reject)=>{
+		const booksObjectAsArray=Object.values(books); //Using previous method
+		const storedAuthor=req.params.author;
+		
+		let filteredBookByAuthor=booksObjectAsArray.filter((thor)=>thor.author===storedAuthor);
+		
+		if (filteredBookByAuthor){
+			resolve(filteredBookByAuthor);
+		} else {
+			reject("Unknown error.");
+		}
+	});
+	
+	getByAuthor
+	
+		.then(filteredBookByAuthor=>res.send(JSON.stringify(filteredBookByAuthor, null, 4)))
+		.catch(err=>res.status(404).send(err));
+	
 });
 
 // Get all books based on title
@@ -98,6 +164,30 @@ public_users.get('/title/:title',function (req, res) {
 	//workin' great, but same observations like the previous task.
   
 });
+
+//Get all books based on title (using Promise)
+public_users.get('/p/title/:title',function(req,res){ //Same situation as previous Promise's
+	
+	let getByTitle=new Promise((resolve,reject)=>{
+		const booksObjectAsArray=Object.values(books);
+		const storedTitle=req.params.title;
+	
+		let filteredBookByTitle=booksObjectAsArray.filter((temporalTitleVariable)=>temporalTitleVariable.title===storedTitle);
+		
+		if (filteredBookByTitle){
+			resolve(filteredBookByTitle);
+		} else {
+			reject("Unknown error.");
+		}
+	});
+	
+	getByTitle
+	
+		.then(filteredBookByTitle=>res.send(JSON.stringify(filteredBookByTitle, null, 4)))
+		.catch(err=>res.status(404).send(err));
+	
+});
+
 
 //  Get book review
 public_users.get('/review/:isbn',function (req, res) {

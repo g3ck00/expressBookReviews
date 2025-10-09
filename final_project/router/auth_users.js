@@ -1,3 +1,7 @@
+//Final tasks solved with Promise's; it is valuable doing them with Async/Await + Axios (remember: Express do not async tasks implicitly)
+//Code works great; maybe a cleaning is needed
+//Add more functionalities, and improve the existing ones
+
 const express = require('express');
 const jwt = require('jsonwebtoken');
 let books = require("./booksdb.js");
@@ -52,29 +56,47 @@ regd_users.post("/login", (req,res) => {
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
 	
-	//Task parcially solved, pending details
-	
 	const storedIsbn=req.params.isbn;
 	
 	let foundBook=books[storedIsbn]; //Retrieve book object associated with ISBN
 	
+	
+	
 	if (foundBook){ //Check if book exists
 		let review=req.body.review;
 	
-		if (review){
-			foundBook["reviews"]=JSON.stringify(req.body.username)+": "+review;
+		if (review){ //If review is null (empty), it will be sent an error message
+			books[storedIsbn].reviews[req.session.authorization.username]=review; //This works well, but I don't know EXACTLY how it works... //username is truly stored in req.session.authorization.username
+			//general explanation: object[key].subObject[dynamicKey]=req.body.[something];
+			res.send("Review added!");
+		} else {
+			res.send("Invalid review! (Did you forgot writing it...?");
 		}
-		
-		books[storedIsbn]=foundBook; //Update book details in "books" object
-	
-		res.send("Review added!");
-	
 	} else {
 		res.send("Unable to find book! Check the ISBN...");
 	}
+});
+
+regd_users.delete("/auth/review/delete/:isbn",(req,res)=>{
 	
+	//Procedure that looks like the PUT function above
 	
- 
+	const storedIsbn=req.params.isbn;
+	
+	let foundBook=books[storedIsbn];
+	
+	if (foundBook){
+		
+		if (books[storedIsbn].reviews[req.session.authorization.username]){ //Check if current user has a review posted; if there is nothing to delete, will do nothing but popping up an information message
+			delete books[storedIsbn].reviews[req.session.authorization.username];
+	
+			res.send("Review deleted!");
+		} else {
+			res.send("You have no review posted for this book...");
+		}
+	} else {
+		res.send("Unable to find book! Check the ISBN...");
+	}
 });
 
 module.exports.authenticated = regd_users;

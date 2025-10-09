@@ -1,6 +1,10 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const session = require('express-session')
+//Final tasks solved with Promise's; it is valuable doing them with Async/Await + Axios (remember: Express do not async tasks implicitly)
+//Code works great; maybe a cleaning is needed
+//Add more functionalities, and improve the existing ones
+
 const customer_routes = require('./router/auth_users.js').authenticated;
 const genl_routes = require('./router/general.js').general;
 
@@ -12,20 +16,20 @@ app.use("/customer",session({secret:"fingerprint_customer",resave: true, saveUni
 
 app.use("/customer/auth/*", function auth(req,res,next){ //pending for test
 
-if (req.session.authorization){
-	let token=req.session.authorization['accessToken'];
+	if (req.session.authorization){
+		let token=req.session.authorization['accessToken'];
 
-jwt.verify(token, "access", (err,user)=>{
-if (!err){
-		req.user=user;
-		next();
-} else {
-	return res.status(403).json({message: "User not authenticated!"});
-}
-});
-} else {
+		jwt.verify(token, "access", (err,user)=>{
+			if (!err){
+				req.user=user;
+				next();
+			} else {
+				return res.status(403).json({message: "User not authenticated!"});
+			}
+		});
+	} else {
 		return res.status(403).json({message: "User not logged in!"});
-}
+	}
 });
 
 const PORT =5000;
